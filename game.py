@@ -4,7 +4,7 @@ import sys
 
 
 pygame.init()
-size = width, height = 500, 500
+size = width, height = 950, 550
 screen = pygame.display.set_mode(size)
 
 
@@ -50,7 +50,7 @@ def load_level(filename):
     max_width = max(map(len, level_map))
 
     # дополняем каждую строку пустыми клетками ('.')
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+    return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
 
 
 def terminate():
@@ -58,35 +58,34 @@ def terminate():
     sys.exit()
 
 
-'''def start_screen(WIDTH, HEIGHT):
-    intro_text = ["ЗАСТАВКА", "",
+def start_screen(wid, heig):
+    intro_text = ["Master of dungeon", "",
                   "Правила игры",
                   "Если в правилах несколько строк,",
                   "приходится выводить их построчно"]
 
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    fon = pygame.transform.scale(load_image('fon.jpg'), (wid, heig))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
     text_coord = 50
     for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('white'))
+        string_rendered = font.render(line, True, pygame.Color('white'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
         intro_rect.x = 10
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
-
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
-                return generate_level('hh')
+                return
+
         pygame.display.flip()
         clock.tick(FPS)
-'''
 
 
 def generate_level(level):
@@ -100,37 +99,52 @@ def generate_level(level):
             elif level[y][x] == '@':
                 Tile('empty', x, y)
                 new_player = Player(x, y)
+                level[y][x] = '.'
+                print(level)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
 
-def move(character, move_dir):
-    x,y = character.pos
-    if move_dir == 'up':
-        pass
+def movement(charec, direction):
+    x, y = charec.positions
+    if direction == 'down':
+        if map_of_level[y + 1][x] == '.' and y < border_y - 1:
+            charec.move_player(x, y + 1)
+    if direction == 'up':
+        if map_of_level[y - 1][x] == '.' and y > 0:
+            charec.move_player(x, y - 1)
+    if direction == 'right':
+        if map_of_level[y][x + 1] == '.' and x < border_x - 1:
+            charec.move_player(x + 1, y)
+    if direction == 'left':
+        if map_of_level[y][x - 1] == '.' and x > 0:
+            charec.move_player(x - 1, y)
 
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites)
+        super().__init__(tiles_group)
         self.image = tile_images[tile_type]
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x - 25, tile_height * pos_y - 25)
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
+        super().__init__(player_group)
         self.image = player_image
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.positions = (pos_x, pos_y)
+
+    def move_player(self, x, y):
+        self.positions = (x, y)
+        self.rect = self.image.get_rect().move(tile_width * self.positions[0] + 15, tile_height * self.positions[1] + 5)
 
 
 class Camera:
     # зададим начальный сдвиг камеры
     def __init__(self):
-        self.dx = 0
-        self.dy = 0
+        self.dx = 10
+        self.dy = 10
 
     # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
@@ -150,18 +164,33 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     running = True
 
+    map_of_level = load_level('map.txt')
+    move_by = 50
+    player, border_x, border_y = generate_level(map_of_level)
+    start_screen(width, height)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
+            if event.type == pygame.MOUSEBUTTONUP:
+                yes = 1
+            key = pygame.key.get_pressed()
+            if key[pygame.K_DOWN]:
+                movement(player, 'down')
+            elif key[pygame.K_UP]:
+                movement(player, 'up')
+            if key[pygame.K_LEFT]:
+                movement(player, 'left')
+            elif key[pygame.K_RIGHT]:
+                movement(player, 'right')
         screen.fill((0, 0, 0))
-        all_sprites.draw(screen)
-        all_sprites.update()
+        tiles_group.draw(screen)
+        player_group.draw(screen)
+        tiles_group.update()
+        player_group.update()
         pygame.display.flip()
         clock.tick(FPS)
-        player, level_x, level_y = generate_level(load_level('map.txt'))
+
         camera = Camera()
         # изменяем ракурс камеры
         camera.update(player)
