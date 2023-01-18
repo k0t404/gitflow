@@ -4,11 +4,14 @@ import sys
 
 
 pygame.init()
-size = width, height = 950, 550
+sector = 1
+size = width, height = 1500, 800
 screen = pygame.display.set_mode(size)
+cou = 0
 
 
 def load_image(name, colorkey=None):
+    change_name = ['wall.png', 'floor.png', 'knight.png', 'gem.png', 'door.png']
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -21,15 +24,19 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey)
     else:
         image = image.convert_alpha()
+    if name in change_name:
+        return pygame.transform.scale(image, (50, 50))
     return image
 
 
 tile_images = {
-    'wall': load_image('box.png'),
-    'empty': load_image('grass.png')
+    'wall': load_image('wall.png'),
+    'empty': load_image('floor.png'),
+    'door': load_image('door.png'),
+    'gem': load_image('gem.png', 'white')
 }
-player_image = load_image('mario.png')
-
+player_image = load_image('knight.png', 'white')
+gem_image = load_image('gem.png', 'white')
 tile_width = tile_height = 50
 # основной персонаж
 player = None
@@ -37,6 +44,7 @@ player = None
 # группы спрайтов
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
+gem_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
 
@@ -85,40 +93,107 @@ def start_screen(wid, heig):
                 return
 
         pygame.display.flip()
-        clock.tick(FPS)
+        '''clock.tick(FPS)'''
 
 
 def generate_level(level):
     new_player, x, y = None, None, None
+    global cou
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
                 Tile('empty', x, y)
             elif level[y][x] == '#':
                 Tile('wall', x, y)
-            elif level[y][x] == '@':
+            elif level[y][x] == '@' and cou == 0:
+                cou += 1
                 Tile('empty', x, y)
                 new_player = Player(x, y)
                 level[y][x] = '.'
                 print(level)
+            elif level[y][x] == '@' and cou != 0:
+                cou += 1
+                Tile('empty', x, y)
+                level[y][x] = '.'
+                print(level)
+            elif level[y][x] == '*':
+                Tile('empty', x, y)
+                Tile('gem', x, y)
+            elif level[y][x] == '?':
+                Tile('door', x, y)
+            elif level[y][x] == '!':
+                Tile('door', x, y)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
 
 def movement(charec, direction):
     x, y = charec.positions
+    global sector
+    global map_of_level
     if direction == 'down':
-        if map_of_level[y + 1][x] == '.' and y < border_y - 1:
+        if map_of_level[y + 1][x] == '?' and y < border_y - 1:
+            sector += 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y + 1][x] == '!' and y < border_y - 1:
+            sector -= 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y + 1][x] == '.' or map_of_level[y + 1][x] == '*' and y < border_y - 1:
             charec.move_player(x, y + 1)
     if direction == 'up':
-        if map_of_level[y - 1][x] == '.' and y > 0:
+        if map_of_level[y - 1][x] == '?' and y < border_y - 1:
+            sector += 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y - 1][x] == '!' and y < border_y - 1:
+            sector -= 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y - 1][x] == '.' or map_of_level[y - 1][x] == '*' and y > 0:
             charec.move_player(x, y - 1)
     if direction == 'right':
-        if map_of_level[y][x + 1] == '.' and x < border_x - 1:
+        if map_of_level[y][x + 1] == '?' and y < border_y - 1:
+            sector += 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y][x + 1] == '!' and y < border_y - 1:
+            sector -= 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y][x + 1] == '.' or map_of_level[y][x + 1] == '*' and x < border_x - 1:
             charec.move_player(x + 1, y)
+            charec.change_look('right')
     if direction == 'left':
-        if map_of_level[y][x - 1] == '.' and x > 0:
+        if map_of_level[y][x - 1] == '?' and y < border_y - 1:
+            sector += 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y][x - 1] == '!' and y < border_y - 1:
+            sector -= 1
+            map_of_level = load_level(f'sector{sector}.txt')
+            generate_level(map_of_level)
+            player.move_player(1, 2)
+        if map_of_level[y][x - 1] == '.' or map_of_level[y][x - 1] == '*' and x > 0:
             charec.move_player(x - 1, y)
+            charec.change_look('left')
+
+
+'''class Gem(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(gem_group)
+        self.image = gem_image
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+        self.positions = (pos_x, pos_y)
+'''
 
 
 class Tile(pygame.sprite.Sprite):
@@ -132,40 +207,27 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group)
         self.image = player_image
-        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
         self.positions = (pos_x, pos_y)
+        self.look = 'right'
 
     def move_player(self, x, y):
         self.positions = (x, y)
-        self.rect = self.image.get_rect().move(tile_width * self.positions[0] + 15, tile_height * self.positions[1] + 5)
+        self.rect = self.image.get_rect().move(tile_width * x, tile_height * y)
 
-
-class Camera:
-    # зададим начальный сдвиг камеры
-    def __init__(self):
-        self.dx = 10
-        self.dy = 10
-
-    # сдвинуть объект obj на смещение камеры
-    def apply(self, obj):
-        obj.rect.x += self.dx
-        obj.rect.y += self.dy
-
-    # позиционировать камеру на объекте target
-    def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
+    def change_look(self, look):
+        if look != self.look and look == 'right':
+            self.image = pygame.transform.flip(self.image, True, False)
+            self.look = 'right'
+        elif look != self.look and look == 'left':
+            self.image = pygame.transform.flip(self.image, True, False)
+            self.look = 'left'
 
 
 if __name__ == '__main__':
-    FPS = 50
-
-    all_sprites = pygame.sprite.Group()
-    clock = pygame.time.Clock()
     running = True
 
-    map_of_level = load_level('map.txt')
-    move_by = 50
+    map_of_level = load_level(f'sector{sector}.txt')
     player, border_x, border_y = generate_level(map_of_level)
     start_screen(width, height)
     while running:
@@ -175,26 +237,27 @@ if __name__ == '__main__':
             if event.type == pygame.MOUSEBUTTONUP:
                 yes = 1
             key = pygame.key.get_pressed()
-            if key[pygame.K_DOWN]:
+            if key[pygame.K_DOWN] or key[pygame.K_s]:
                 movement(player, 'down')
-            elif key[pygame.K_UP]:
+            elif key[pygame.K_UP] or key[pygame.K_w]:
                 movement(player, 'up')
-            if key[pygame.K_LEFT]:
+            if key[pygame.K_LEFT] or key[pygame.K_a]:
                 movement(player, 'left')
-            elif key[pygame.K_RIGHT]:
+            elif key[pygame.K_RIGHT] or key[pygame.K_d]:
                 movement(player, 'right')
         screen.fill((0, 0, 0))
         tiles_group.draw(screen)
+        gem_group.draw(screen)
         player_group.draw(screen)
         tiles_group.update()
+        gem_group.update()
         player_group.update()
         pygame.display.flip()
-        clock.tick(FPS)
-
+        '''clock.tick(FPS)
         camera = Camera()
         # изменяем ракурс камеры
         camera.update(player)
         # обновляем положение всех спрайтов
         for sprite in all_sprites:
-            camera.apply(sprite)
+            camera.apply(sprite)'''
     pygame.quit()
