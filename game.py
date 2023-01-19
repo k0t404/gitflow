@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 
+
 pygame.init()
 sector = 1
 size = width, height = 1500, 800
@@ -107,12 +108,13 @@ def start_screen(wid, heig):
 
 
 def death_screen(wid, heig):
-    intro_text = ["YOU DIED", "",
+    pygame.mixer.music.pause()
+    intro_text = ["", "",
                   " ",
                   " ",
                   " "]
 
-    fon = pygame.transform.scale(load_image('fon.jpg'), (wid, heig))
+    fon = pygame.transform.scale(load_image('fon1.jpg'), (wid, heig))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 80)
     text_coord = 50
@@ -130,6 +132,7 @@ def death_screen(wid, heig):
                 terminate()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.mixer.music.play(-1)
                 return
 
         pygame.display.flip()
@@ -215,8 +218,7 @@ def movement(charec, direction):
             generate_level(map_of_level)
             player.move_player(3, 5)
             save_level()
-        if y < border_y - 1 and map_of_level[y + 1][x] == '.' or map_of_level[y + 1][x] == '*' or map_of_level[y + 1][
-            x] == '&':
+        if y < border_y - 1 and map_of_level[y + 1][x] == '.' or map_of_level[y + 1][x] == '*' or map_of_level[y + 1][x] == '&':
             charec.move_player(x, y + 1)
     if direction == 'up':
         if map_of_level[y - 1][x] == '&' and y > 0:
@@ -262,8 +264,7 @@ def movement(charec, direction):
             generate_level(map_of_level)
             player.move_player(3, 5)
             save_level()
-        if x < border_x - 1 and map_of_level[y][x + 1] == '.' or map_of_level[y][x + 1] == '*' or map_of_level[y][
-            x + 1] == '&':
+        if x < border_x - 1 and map_of_level[y][x + 1] == '.' or map_of_level[y][x + 1] == '*' or map_of_level[y][x + 1] == '&':
             charec.move_player(x + 1, y)
             charec.change_look('right')
     if direction == 'left':
@@ -321,6 +322,9 @@ class Player(pygame.sprite.Sprite):
 
 
 if __name__ == '__main__':
+    pygame.mixer.music.load('data/musik.mp3')
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.2)
     running = True
 
     map_of_level = load_level(f'sector{sector}.txt')
