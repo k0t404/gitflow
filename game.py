@@ -8,7 +8,6 @@ sector = 0
 size = width, height = 1500, 800
 screen = pygame.display.set_mode(size)
 cou = 0
-cou2 = 0
 
 
 def load_image(name, colorkey=None):
@@ -90,15 +89,6 @@ def load_level(filename):
 
     # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
-
-
-def write_save():
-    original_maps = [load_level('sector0.txt'), load_level('sector1.txt'), load_level('sector2.txt')]
-    with open('data/save.txt', 'w') as save:
-        for map_level in original_maps:
-            for line in map_level:
-                save.writelines(''.join(line) + '\n')
-            save.writelines('|')
 
 
 def remote(all_point):
@@ -194,11 +184,11 @@ def generate_level(level):
                     cou += 1
                     Tile('empty', x, y)
                     new_player = Player(x, y)
-                    level[y][x] = '%'
+                    level[y][x] = '.'
                 elif level[y][x] == '@' and cou != 0:
                     cou += 1
                     Tile('empty', x, y)
-                    level[y][x] = '%'
+                    level[y][x] = '.'
                 elif level[y][x] == '*':
                     Tile('empty', x, y)
                     Tile('gem', x, y)
@@ -213,11 +203,11 @@ def generate_level(level):
                     cou += 1
                     Tile('grass', x, y)
                     new_player = Player(x, y)
-                    level[y][x] = '.'
+                    level[y][x] = '%'
                 elif level[y][x] == '@' and cou != 0:
                     cou += 1
                     Tile('grass', x, y)
-                    level[y][x] = '.'
+                    level[y][x] = '%'
                 elif level[y][x] == '*':
                     Tile('grass', x, y)
                     Tile('gem', x, y)
@@ -253,30 +243,16 @@ def generate_level(level):
 def restart(how):
     global sector
     global cou
-    cou1 = 0
     if how == 'normal':
         player.move_player(9, 5)
     if how == 'total':
         save_points(0)
-        save = open('data/save.txt', 'r')
-        maps = (''.join(save.readlines())).split('|')
-        save.close()
-        maps.pop(-1)
-        maps_orig = []
-        for part in maps:
-            maps_orig.append(part.split('\n'))
-        for map_level in maps_orig:
-            print(map_level)
-            print(map_of_level)
-            with open(f'data/sector{cou1}', 'w') as map_save:
-                for line in map_level:
-                    print(line)
-                    map_save.write(line + '\n')
-            with open(f'data/sector{cou1}', 'r') as map_save:
-                map_save.readlines()
-            cou1 += 1
-        sector = 0
-        cou = 0
+        for i in range(4):
+            with open(f'data/sector{i}_orig.txt', 'r') as original:
+                level_map = original.readlines()
+                with open(f'data/sector{i}.txt', 'w') as to_save:
+                    for line in level_map:
+                        to_save.writelines(line)
 
 
 def movement(charec, direction):
@@ -284,7 +260,9 @@ def movement(charec, direction):
     global sector
     global map_of_level
     global all_points
-    global cou2
+    global gem_get_is
+    global attack_is
+    global save_coord
     if direction == 'down':
         if map_of_level[y + 1][x] == '&' and y < border_y - 1:
             save_level('normal', x, y)
@@ -293,18 +271,21 @@ def movement(charec, direction):
                 all_points += 1
                 Tile('empty', x, y + 1)
                 map_of_level[y + 1][x] = '.'
-                save_level('normal', x, y)
+                gem_get_is = True
         if sector == 0:
             if map_of_level[y + 1][x] == '*' and y < border_y - 1:
                 all_points += 1
                 Tile('grass', x, y + 1)
-                map_of_level[y + 1][x] = '.'
+                map_of_level[y + 1][x] = '%'
+                gem_get_is = True
         if map_of_level[y + 1][x] == '0':
             if all_points >= 1 and y < border_y - 1:
                 all_points += 1
                 Tile('empty', x, y + 1)
                 map_of_level[y + 1][x] = '.'
-                player.move_player(x, y + 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -313,7 +294,9 @@ def movement(charec, direction):
                 all_points += 2
                 Tile('empty', x, y + 1)
                 map_of_level[y + 1][x] = '.'
-                player.move_player(x, y + 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -322,7 +305,9 @@ def movement(charec, direction):
                 all_points += 3
                 Tile('empty', x, y + 1)
                 map_of_level[y + 1][x] = '.'
-                player.move_player(x, y + 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -331,7 +316,9 @@ def movement(charec, direction):
                 all_points += 4
                 Tile('empty', x, y + 1)
                 map_of_level[y + 1][x] = '.'
-                player.move_player(x, y + 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -339,17 +326,17 @@ def movement(charec, direction):
             death_screen(width, height)
             restart('normal')
         if map_of_level[y + 1][x] == '?' and y < border_y - 1:
+            save_level('normal', x, y)
             sector += 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(9, 6)
-            save_level('normal', x, y)
         if map_of_level[y + 1][x] == '!' and y < border_y - 1:
+            save_level('normal', x, y)
             sector -= 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(4, 4)
-            save_level('normal', x, y)
         if y < border_y - 1 and map_of_level[y + 1][x] == '.' or map_of_level[y + 1][x] == '*' or \
                 map_of_level[y + 1][x] == '&' or map_of_level[y + 1][x] == '@' or map_of_level[y + 1][x] == '%':
             charec.move_player(x, y + 1)
@@ -361,17 +348,21 @@ def movement(charec, direction):
                 all_points += 1
                 Tile('empty', x, y - 1)
                 map_of_level[y - 1][x] = '.'
+                gem_get_is = True
         if sector == 0:
             if map_of_level[y - 1][x] == '*' and y > 0:
                 all_points += 1
                 Tile('grass', x, y - 1)
-                map_of_level[y - 1][x] = '.'
+                map_of_level[y - 1][x] = '%'
+                gem_get_is = True
         if map_of_level[y - 1][x] == '0':
             if all_points >= 1 and y > 0:
                 all_points += 1
                 Tile('empty', x, y - 1)
                 map_of_level[y - 1][x] = '.'
-                player.move_player(x, y - 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -380,7 +371,9 @@ def movement(charec, direction):
                 all_points += 2
                 Tile('empty', x, y - 1)
                 map_of_level[y - 1][x] = '.'
-                player.move_player(x, y - 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -389,7 +382,9 @@ def movement(charec, direction):
                 all_points += 3
                 Tile('empty', x, y - 1)
                 map_of_level[y - 1][x] = '.'
-                player.move_player(x, y - 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -398,7 +393,9 @@ def movement(charec, direction):
                 all_points += 4
                 Tile('empty', x, y - 1)
                 map_of_level[y - 1][x] = '.'
-                player.move_player(x, y - 1)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -406,17 +403,17 @@ def movement(charec, direction):
             death_screen(width, height)
             restart('normal')
         if map_of_level[y - 1][x] == '?' and y > 0:
+            save_level('normal', x, y)
             sector += 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(9, 6)
-            save_level('normal', x, y)
         if map_of_level[y - 1][x] == '!' and y > 0:
+            save_level('normal', x, y)
             sector -= 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(4, 4)
-            save_level('normal', x, y)
         if y > 0 and map_of_level[y - 1][x] == '.' or map_of_level[y - 1][x] == '*' or \
                 map_of_level[y - 1][x] == '&' or map_of_level[y - 1][x] == '@' or map_of_level[y + 1][x] == '%':
             charec.move_player(x, y - 1)
@@ -428,17 +425,21 @@ def movement(charec, direction):
                 all_points += 1
                 Tile('empty', x + 1, y)
                 map_of_level[y][x + 1] = '.'
+                gem_get_is = True
         if sector == 0:
             if map_of_level[y][x + 1] == '*' and x < border_x - 1:
                 all_points += 1
                 Tile('grass', x + 1, y)
-                map_of_level[y][x + 1] = '.'
+                map_of_level[y][x + 1] = '%'
+                gem_get_is = True
         if map_of_level[y][x + 1] == '0':
             if all_points >= 1 and x < border_x - 1:
                 all_points += 1
                 Tile('empty', x + 1, y)
                 map_of_level[y][x + 1] = '.'
-                player.move_player(x + 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -447,7 +448,9 @@ def movement(charec, direction):
                 all_points += 2
                 Tile('empty', x + 1, y)
                 map_of_level[y][x + 1] = '.'
-                player.move_player(x + 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -456,7 +459,9 @@ def movement(charec, direction):
                 all_points += 3
                 Tile('empty', x + 1, y)
                 map_of_level[y][x + 1] = '.'
-                player.move_player(x + 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -465,7 +470,9 @@ def movement(charec, direction):
                 all_points += 4
                 Tile('empty', x + 1, y)
                 map_of_level[y][x + 1] = '.'
-                player.move_player(x + 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -473,17 +480,17 @@ def movement(charec, direction):
             death_screen(width, height)
             restart('normal')
         if map_of_level[y][x + 1] == '?' and x < border_x - 1:
+            save_level('normal', x, y)
             sector += 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(9, 6)
-            save_level('normal', x, y)
         if map_of_level[y][x + 1] == '!' and x < border_x - 1:
+            save_level('normal', x, y)
             sector -= 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(4, 4)
-            save_level('normal', x, y)
         if x < border_x - 1 and map_of_level[y][x + 1] == '.' or map_of_level[y][x + 1] == '*' or \
                 map_of_level[y][x + 1] == '&' or map_of_level[y][x + 1] == '@' or map_of_level[y + 1][x] == '%':
             charec.move_player(x + 1, y)
@@ -496,17 +503,21 @@ def movement(charec, direction):
                 all_points += 1
                 Tile('empty', x - 1, y)
                 map_of_level[y][x - 1] = '.'
+                gem_get_is = True
         if sector == 0:
             if map_of_level[y][x - 1] == '*' and x > 0:
                 all_points += 1
                 Tile('grass', x - 1, y)
-                map_of_level[y][x - 1] = '.'
+                map_of_level[y][x - 1] = '%'
+                gem_get_is = True
         if map_of_level[y][x - 1] == '0':
             if all_points >= 1 and x > 0:
                 all_points += 1
                 Tile('empty', x - 1, y)
                 map_of_level[y][x - 1] = '.'
-                player.move_player(x - 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -515,7 +526,9 @@ def movement(charec, direction):
                 all_points += 2
                 Tile('empty', x - 1, y)
                 map_of_level[y][x - 1] = '.'
-                player.move_player(x - 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -524,7 +537,9 @@ def movement(charec, direction):
                 all_points += 3
                 Tile('empty', x - 1, y)
                 map_of_level[y][x - 1] = '.'
-                player.move_player(x - 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -533,7 +548,9 @@ def movement(charec, direction):
                 all_points += 4
                 Tile('empty', x - 1, y)
                 map_of_level[y][x - 1] = '.'
-                player.move_player(x - 1, y)
+                attack_is = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -541,17 +558,17 @@ def movement(charec, direction):
             death_screen(width, height)
             restart('normal')
         if map_of_level[y][x - 1] == '?' and x > 0:
+            save_level('normal', x, y)
             sector += 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(9, 6)
-            save_level('normal', x, y)
         if map_of_level[y][x - 1] == '!' and x > 0:
+            save_level('normal', x, y)
             sector -= 1
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(4, 4)
-            save_level('normal', x, y)
         if x > 0 and map_of_level[y][x - 1] == '.' or map_of_level[y][x - 1] == '*' or \
                 map_of_level[y][x - 1] == '&' or map_of_level[y][x - 1] == '@' or map_of_level[y + 1][x] == '%':
             charec.move_player(x - 1, y)
@@ -586,24 +603,89 @@ class Player(pygame.sprite.Sprite):
             self.look = 'left'
 
 
+class AnimatedGemGet(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(gem_get_sprites)
+        self.place_x = player.positions[0]
+        self.place_y = player.positions[1]
+        print(player.positions[0], player.positions[1])
+        self.frames = []   # список кадров
+        self.cut_sheet(sheet, columns, rows)  # разреанная на кадры
+        self.cur_frame = 0  # номер кадра нынешнего
+        self.image = self.frames[self.cur_frame]  # Кадр в нынешний момент
+        self.rect = self.rect.move(self.place_x * x, self.place_y * y)  # место рисовки кадра
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,    # прямоугольник с размерами кадра
+                                sheet.get_height() // rows)
+        for j in range(rows):    # проходить по изначальной картинке и отделяем кадры
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)      # позиция кадра на изначльном изображении
+                self.frames.append(sheet.subsurface(pygame.Rect(       # доюавляем в список кадров
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)   # обновление номера кадра
+        self.image = self.frames[self.cur_frame]      # обновление самого кадра
+
+
+class AnimatedAttack(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y, look):
+        super().__init__(attack_sprites)
+        self.place_x = player.positions[0]
+        self.place_y = player.positions[1]
+        self.look = look
+        self.frames = []   # список кадров
+        self.cut_sheet(sheet, columns, rows)  # разреанная на кадры
+        self.cur_frame = 0  # номер кадра нынешнего
+        self.image = self.frames[self.cur_frame]  # Кадр в нынешний момент
+        self.rect = self.rect.move(self.place_x * x, self.place_y * y)  # место рисовки кадра
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,    # прямоугольник с размерами кадра
+                                sheet.get_height() // rows)
+        for j in range(rows):    # проходить по изначальной картинке и отделяем кадры
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)      # позиция кадра на изначльном изображении
+                self.frames.append(sheet.subsurface(pygame.Rect(       # доюавляем в список кадров
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)   # обновление номера кадра
+        if self.look == 'left':
+            self.image = self.frames[self.cur_frame]      # обновление самого кадра
+            self.image = pygame.transform.flip(self.image, True, False)
+        else:
+            self.image = self.frames[self.cur_frame]
+
+
 if __name__ == '__main__':
     all_points = int(load_points())
     pygame.mixer.music.load('data/game_music.mp3')
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(0.2)
-    running = True
 
+    FPS = 24
+    running = True
+    clock = pygame.time.Clock()
     map_of_level = load_level(f'sector{sector}.txt')
     player, border_x, border_y = generate_level(map_of_level)
     start_screen(width, height)
+    save_coord = (1, 1)
+    gem_get_sprites = pygame.sprite.Group()
+    gem_get_is = False
+    cou_gem_get = 1
+    attack_sprites = pygame.sprite.Group()
+    attack_is = False
+    cou_attack = 1
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 save_points(all_points)
                 save_level('quit', player.positions[0], player.positions[1])
                 running = False
-            if event.type == pygame.MOUSEBUTTONUP:
-                yes = 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                attack_is = True
             key = pygame.key.get_pressed()
             if key[pygame.K_DOWN] or key[pygame.K_s]:
                 movement(player, 'down')
@@ -616,12 +698,38 @@ if __name__ == '__main__':
             if key[pygame.K_SPACE]:
                 restart('total')
                 sys.exit()
+        save_coord = (player.positions[0], player.positions[1])
         screen.fill((0, 0, 0))
         tiles_group.draw(screen)
         player_group.draw(screen)
         tiles_group.update()
         player_group.update()
+        if cou_gem_get < 8 and gem_get_is:
+            if cou_gem_get == 1:
+                gem_get = AnimatedGemGet(load_image("anim1.png", 'white'), 4, 2, 50, 50)
+            gem_get_sprites.update()
+            gem_get_sprites.draw(screen)
+            cou_gem_get += 1
+        if cou_gem_get >= 8:
+            gem_get_sprites.empty()
+            cou_gem_get = 1
+            gem_get_is = False
+        if cou_attack <= 8 and attack_is:
+            if cou_attack == 1:
+                attack = AnimatedAttack(load_image("anim.png", 'white'), 4, 2, 50, 50, player.look)  # приводим класс в действие
+            attack_sprites.update()  # запускаем анимацию
+            attack_sprites.draw(screen)
+            cou_attack += 1
+        if cou_attack > 8:
+            attack_sprites.empty()
+            cou_attack = 1
+            attack_is = False
+            if player.look == 'left':
+                player = Player(save_coord[0], save_coord[1])
+                player.change_look('left')
+            else:
+                player = Player(save_coord[0], save_coord[1])
         remote(all_points)
         pygame.display.flip()
-        '''clock.tick(FPS)'''
+        clock.tick(FPS)
     pygame.quit()
