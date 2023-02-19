@@ -599,9 +599,9 @@ class AnimatedGemGet(pygame.sprite.Sprite):  # анимация разрушен
         self.image = self.frames[self.cur_frame]  # обновление самого кадра
 
 
-class AnimatedAttack(pygame.sprite.Sprite):  # анимация атаки(егор)
+class AnimatedAttack1(pygame.sprite.Sprite):  # анимация атаки(егор)
     def __init__(self, sheet, columns, rows, x, y, look):
-        super().__init__(attack_sprites)
+        super().__init__(attack1_sprites)
         self.place_x = player.positions[0]
         self.place_y = player.positions[1]
         self.look = look
@@ -619,6 +619,29 @@ class AnimatedAttack(pygame.sprite.Sprite):  # анимация атаки(ег�
                 frame_location = (self.rect.w * i, self.rect.h * j)  # позиция кадра на изначльном изображении
                 self.frames.append(sheet.subsurface(pygame.Rect(  # доюавляем в список кадров
                     frame_location, self.rect.size)))
+
+
+class AnimatedAttack2(pygame.sprite.Sprite):  # анимация атаки(егор)
+    def __init__(self, sheet, columns, rows, x, y, look):
+        super().__init__(attack2_sprites)
+        self.place_x = player.positions[0]
+        self.place_y = player.positions[1]
+        self.look = look
+        self.frames = []  # список кадров
+        self.cut_sheet(sheet, columns, rows)  # разреанная на кадры
+        self.cur_frame = 0  # номер кадра нынешнего
+        self.image = self.frames[self.cur_frame]  # Кадр в нынешний момент
+        self.rect = self.rect.move(self.place_x * x, self.place_y * y)  # место рисовки кадра
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,  # прямоугольник с размерами кадра
+                                sheet.get_height() // rows)
+        for j in range(rows):  # проходить по изначальной картинке и отделяем кадры
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)  # позиция кадра на изначльном изображении
+                self.frames.append(sheet.subsurface(pygame.Rect(  # доюавляем в список кадров
+                    frame_location, self.rect.size)))
+
 
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)  # обновление номера кадра
@@ -683,9 +706,13 @@ if __name__ == '__main__':
     gem_get_is = False
     cou_gem_get = 1
 
-    attack_sprites = pygame.sprite.Group()
-    attack_is = False
-    cou_attack = 1
+    attack1_sprites = pygame.sprite.Group()
+    attack_is_1 = False
+    cou_attack_1 = 1
+
+    attack2_sprites = pygame.sprite.Group()
+    attack_is_2 = False
+    cou_attack_2 = 1
 
     board = Board(30, 17)
     start_screen(width, height)
@@ -698,7 +725,8 @@ if __name__ == '__main__':
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 attack_is = True
-                player_group.empty()
+                save_coord = player.positions[0], player.positions[1]
+                '''player_group.empty()'''
                 print(board.get_cell(event.pos))
             key = pygame.key.get_pressed()
             if key[pygame.K_DOWN] or key[pygame.K_s]:
@@ -728,17 +756,33 @@ if __name__ == '__main__':
             gem_get_sprites.empty()
             cou_gem_get = 1
             gem_get_is = False
-        if cou_attack <= 8 and attack_is:
-            if cou_attack == 1:
+        if cou_attack_1 <= 8 and attack_is_1:
+            if cou_attack_1 == 1:
                 # приводим класс в действие
-                attack = AnimatedAttack(load_image("anim.png", 'white'), 4, 2, 50, 50, player.look)
-            attack_sprites.update()  # запускаем анимацию
-            attack_sprites.draw(screen)
-            cou_attack += 1
-        if cou_attack > 8:
-            attack_sprites.empty()
+                attack = AnimatedAttack1(load_image("anim2.png", 'white'), 4, 2, 50, 50, player.look)
+            attack1_sprites.update()  # запускаем анимацию
+            attack1_sprites.draw(screen)
+            cou_attack_1 += 1
+        if cou_attack_1 > 8:
+            attack1_sprites.empty()
             cou_attack = 1
             attack_is = False
+            if player.look == 'left':
+                player = Player(save_coord[0], save_coord[1])
+                player.change_look('left')
+            else:
+                player = Player(save_coord[0], save_coord[1])
+        if cou_attack_2 <= 8 and attack_is_2:
+            if cou_attack_2 == 1:
+                # приводим класс в действие
+                attack = AnimatedAttack2(load_image("anim2.png", 'white'), 4, 2, 50, 50, player.look)
+            attack2_sprites.update()  # запускаем анимацию
+            attack2_sprites.draw(screen)
+            cou_attack_2 += 1
+        if cou_attack_2 > 8:
+            attack2_sprites.empty()
+            cou_attack_2 = 1
+            attack_is_2 = False
             if player.look == 'left':
                 player = Player(save_coord[0], save_coord[1])
                 player.change_look('left')
