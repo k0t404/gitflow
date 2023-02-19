@@ -1,6 +1,9 @@
 import pygame
-import os
 import sys
+from load_smth import load_image, load_level, load_points, load_level_player
+from save_smth import save_points, save_level_player
+from smth_screen import death_screen, start_screen, terminate
+
 
 # глобальные переменные
 pygame.init()
@@ -11,25 +14,6 @@ cou = 0
 cou2 = 0
 max_point = 70
 level_player = 0
-
-
-def load_image(name, colorkey=None):  # загрузка экрана(егор)
-    change_name = ['wall.png', 'floor.png', 'knight.png', 'gem.png', 'door.png']
-    fullname = os.path.join('data', name)
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    if colorkey is not None:
-        image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    if name in change_name:
-        return pygame.transform.scale(image, (50, 50))
-    return image
 
 
 # загрузка картинок
@@ -71,18 +55,6 @@ def save_level(kind, x, y):  # сохранение положения игро�
             mapFile.writelines(''.join(y) + '\n')
 
 
-def save_level_player(level_pl):  # сохранение уровня игрока(ярик)
-    point = open('data/level_player.txt', 'w')
-    point.write(str(level_pl))
-    point.close()
-
-
-def load_level_player():  # загрузка уровня игрока(ярик)
-    with open('data/level_player.txt', 'r') as points:
-        point = points.read()
-    return point
-
-
 def up_level(points):  # повышение уровня игрока зависимое от колличества очков(ярик)
     global level_player
     if points < 1:
@@ -99,76 +71,16 @@ def up_level(points):  # повышение уровня игрока завис
         level_player = 5
 
 
-def save_points(all_point):  # сохранение очков(ярик)
-    point = open('data/points.txt', 'w')
-    point.write(str(all_point))
-    point.close()
-
-
-def load_points():  # загрузка очков(ярик)
-    with open('data/points.txt', 'r') as points:
-        point = points.read()
-    return point
-
-
-def load_level(filename):  # загрузка уровня(егор)
-    filename = "data/" + filename
-    # читаем уровень, убирая символы перевода строки
-    with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
-
-    # и подсчитываем максимальную длину
-    max_width = max(map(len, level_map))
-
-    # дополняем каждую строку пустыми клетками ('.')
-    return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
-
-
-def remote_p(all_point):  # выведение на экран колличество очков(ярик)
+def remote_out(all_point):  # выведение на экран колличество очков(ярик)
     font = pygame.font.Font(None, 30)
     text = font.render(f"Points: {all_point}", True, (250, 42, 42))
     screen.blit(text, (10, 770))
 
 
-def remote_l(level_pl):  # загрузка уровня(ярик)
+def remote_load(level_pl):  # загрузка уровня(ярик)
     font = pygame.font.Font(None, 30)
     text = font.render(f"Level: {level_pl}", True, (250, 42, 42))
     screen.blit(text, (10, 750))
-
-
-def terminate():  # выход из игры(егор)
-    pygame.quit()
-    sys.exit()
-
-
-def start_screen(wid, heig):  # загрузка начального экрана(егор)
-    intro_text = ["Master of dungeon", "",
-                  "Правила игры",
-                  "Собирайте очки чтобы победить монстров,",
-                  "Чтобы перейти на следующий уровень войдите в красный портал",
-                  'Чтобы начать игру заново нажмите кнопку SPACE']
-
-    fon = pygame.transform.scale(load_image('fon.png'), (wid, heig))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, True, pygame.Color('white'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return
-
-        pygame.display.flip()
 
 
 def final_screen():  # загрузка финального экрана(ярик)
@@ -208,40 +120,6 @@ def final_screen():  # загрузка финального экрана(яри
                 restart('total')
                 terminate()
                 restart('total')
-        pygame.display.flip()
-
-
-def death_screen(wid, heig):  # загрузка экрана смерти(ярик)
-    pygame.mixer.music.load('data/death.mp3')
-    pygame.mixer.music.play(0)
-    intro_text = ["", "",
-                  " ",
-                  " ",
-                  " "]
-
-    fon = pygame.transform.scale(load_image('fon1.jpg'), (wid, heig))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 80)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, True, pygame.Color('RED'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                pygame.mixer.music.pause()
-                pygame.mixer.music.load('data/game_music.mp3')
-                pygame.mixer.music.play(-1)
-                pygame.mixer.music.set_volume(0.2)
-                return
         pygame.display.flip()
 
 
@@ -334,7 +212,7 @@ def restart(how):  # обновление данных(егор)
     global sector
     global cou
     if how == 'normal':
-        player.move_player(9, 6)
+        player.move_player(9, 7)
     if how == 'total':
         save_points(0)
         for i in range(4):
@@ -668,13 +546,6 @@ def movement(charec, direction):  # передвижение(егор)
             charec.change_look('left')
 
 
-class Tile(pygame.sprite.Sprite):  # класс не двигающихся объектов(егор)
-    def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group)
-        self.image = tile_images[tile_type]
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
-
-
 class Player(pygame.sprite.Sprite):  # класс игрока(егор)
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group)
@@ -694,6 +565,13 @@ class Player(pygame.sprite.Sprite):  # класс игрока(егор)
         elif look != self.look and look == 'left':
             self.image = pygame.transform.flip(self.image, True, False)
             self.look = 'left'
+
+
+class Tile(pygame.sprite.Sprite):  # класс не двигающихся объектов(егор)
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(tiles_group)
+        self.image = tile_images[tile_type]
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
 class AnimatedGemGet(pygame.sprite.Sprite):  # анимация разрушение кристаллов(егор)
@@ -820,6 +698,8 @@ if __name__ == '__main__':
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 attack_is = True
+                player_group.empty()
+                print(board.get_cell(event.pos))
             key = pygame.key.get_pressed()
             if key[pygame.K_DOWN] or key[pygame.K_s]:
                 movement(player, 'down')
@@ -865,8 +745,8 @@ if __name__ == '__main__':
             else:
                 player = Player(save_coord[0], save_coord[1])
         up_level(all_points)
-        remote_p(all_points)
-        remote_l(level_player)
+        remote_out(all_points)
+        remote_load(level_player)
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()
