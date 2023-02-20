@@ -642,7 +642,6 @@ class AnimatedAttack2(pygame.sprite.Sprite):  # анимация атаки(ег
                 self.frames.append(sheet.subsurface(pygame.Rect(  # доюавляем в список кадров
                     frame_location, self.rect.size)))
 
-
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)  # обновление номера кадра
         if self.look == 'left':
@@ -650,6 +649,31 @@ class AnimatedAttack2(pygame.sprite.Sprite):  # анимация атаки(ег
             self.image = pygame.transform.flip(self.image, True, False)
         else:
             self.image = self.frames[self.cur_frame]
+
+
+class AnimatedAttack3(pygame.sprite.Sprite):  # анимация атаки(егор)
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(attack3_sprites)
+        self.place_x = shoot_at[0]
+        self.place_y = shoot_at[1]
+        self.frames = []  # список кадров
+        self.cut_sheet(sheet, columns, rows)  # разреанная на кадры
+        self.cur_frame = 0  # номер кадра нынешнего
+        self.image = self.frames[self.cur_frame]  # Кадр в нынешний момент
+        self.rect = self.rect.move(self.place_x * x, self.place_y * y)  # место рисовки кадра
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,  # прямоугольник с размерами кадра
+                                sheet.get_height() // rows)
+        for j in range(rows):  # проходить по изначальной картинке и отделяем кадры
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)  # позиция кадра на изначльном изображении
+                self.frames.append(sheet.subsurface(pygame.Rect(  # доюавляем в список кадров
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)  # обновление номера кадра
+        self.image = self.frames[self.cur_frame]
 
 
 class Board:  # создание доски(егор)
@@ -714,6 +738,10 @@ if __name__ == '__main__':
     attack_is_2 = False
     cou_attack_2 = 1
 
+    attack3_sprites = pygame.sprite.Group()
+    attack_is_3 = False
+    cou_attack_3 = 1
+
     board = Board(30, 17)
     start_screen(width, height)
     while running:
@@ -724,10 +752,11 @@ if __name__ == '__main__':
                 save_level('quit', player.positions[0], player.positions[1])
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                attack_is = True
+                attack_is_2 = True
+                attack_is_3 = True
+                shoot_at = board.get_cell(event.pos)
                 save_coord = player.positions[0], player.positions[1]
-                '''player_group.empty()'''
-                print(board.get_cell(event.pos))
+                player_group.empty()
             key = pygame.key.get_pressed()
             if key[pygame.K_DOWN] or key[pygame.K_s]:
                 movement(player, 'down')
@@ -759,7 +788,7 @@ if __name__ == '__main__':
         if cou_attack_1 <= 8 and attack_is_1:
             if cou_attack_1 == 1:
                 # приводим класс в действие
-                attack = AnimatedAttack1(load_image("anim2.png", 'white'), 4, 2, 50, 50, player.look)
+                attack = AnimatedAttack1(load_image("anim.png", 'white'), 4, 2, 50, 50, player.look)
             attack1_sprites.update()  # запускаем анимацию
             attack1_sprites.draw(screen)
             cou_attack_1 += 1
@@ -788,6 +817,17 @@ if __name__ == '__main__':
                 player.change_look('left')
             else:
                 player = Player(save_coord[0], save_coord[1])
+        if cou_attack_3 <= 8 and attack_is_3:
+            if cou_attack_3 == 1:
+                # приводим класс в действие
+                attack = AnimatedAttack3(load_image("anim3.png", 'white'), 4, 2, 50, 50)
+            attack3_sprites.update()  # запускаем анимацию
+            attack3_sprites.draw(screen)
+            cou_attack_3 += 1
+        if cou_attack_3 > 8:
+            attack3_sprites.empty()
+            cou_attack_3 = 1
+            attack_is_3 = False
         up_level(all_points)
         remote_out(all_points)
         remote_load(level_player)
