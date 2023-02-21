@@ -4,7 +4,6 @@ from load_smth import load_image, load_level, load_points, load_level_player
 from save_smth import save_points, save_level_player
 from smth_screen import death_screen, start_screen, terminate
 
-
 # глобальные переменные
 pygame.init()
 sector = 0
@@ -14,7 +13,6 @@ cou = 0
 cou2 = 0
 max_point = 70
 level_player = 0
-
 
 # загрузка картинок
 tile_images = {
@@ -30,7 +28,9 @@ tile_images = {
     'enemy0': load_image('enemy0.png'),
     'enemy1': load_image('enemy1.png', 'white'),
     'enemy2': load_image('enemy2.png'),
-    'enemy3': load_image('enemy3.png', 'white')
+    'enemy3': load_image('enemy3.png', 'white'),
+    'enemy4': load_image('enemy4.png'),
+    'dead': load_image('dead.png')
 }
 player_image = load_image('knight.png', 'white')
 tile_width = tile_height = 50
@@ -110,16 +110,13 @@ def final_screen():  # загрузка финального экрана(яри
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for event_in in pygame.event.get():
+            if event_in.type == pygame.QUIT:
                 restart('total')
                 terminate()
-                restart('total')
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                restart('total')
+            elif event_in.type == pygame.KEYDOWN or \
+                    event_in.type == pygame.MOUSEBUTTONDOWN:
                 terminate()
-                restart('total')
         pygame.display.flip()
 
 
@@ -203,6 +200,12 @@ def generate_level(level):  # генерирование уровня(вмест
             elif level[y][x] == '3':
                 Tile('empty', x, y)
                 Tile('enemy3', x, y)
+            elif level[y][x] == '4':
+                Tile('empty', x, y)
+                Tile('enemy4', x, y)
+            elif level[y][x] == 'x':
+                Tile('empty', x, y)
+                Tile('dead', x, y)
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
@@ -229,11 +232,9 @@ def movement(charec, direction):  # передвижение(егор)
     global map_of_level
     global all_points
     global gem_get_is
-    global attack_is
+    global attack_is_1
     global save_coord
     if direction == 'down':
-        if map_of_level[y + 1][x] == '&' and y < border_y - 1:
-            save_level('normal', x, y)
         if sector != 0:
             if map_of_level[y + 1][x] == '*' and y < border_y - 1:
                 all_points += 1
@@ -249,47 +250,54 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y + 1][x] == '0':
             if all_points >= 1 and y < border_y - 1:
                 all_points += 1
+                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
-                map_of_level[y + 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y + 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y + 1][x] == '1':
             if all_points >= 10 and y < border_y - 1:
                 all_points += 2
+                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
-                map_of_level[y + 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y + 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y + 1][x] == '2':
             if all_points >= 15 and y < border_y - 1:
                 all_points += 3
+                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
-                map_of_level[y + 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y + 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y + 1][x] == '3':
             if all_points >= 25 and y < border_y - 1:
                 all_points += 4
+                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
-                map_of_level[y + 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y + 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
+        if map_of_level[y + 1][x] == '4':
+            death_screen(width, height)
+            restart('normal')
         if map_of_level[y + 1][x] == '^' and y < border_y - 1:
             death_screen(width, height)
             restart('normal')
@@ -306,11 +314,9 @@ def movement(charec, direction):  # передвижение(егор)
             generate_level(map_of_level)
             player.move_player(4, 4)
         if y < border_y - 1 and map_of_level[y + 1][x] == '.' or map_of_level[y + 1][x] == '*' or \
-                map_of_level[y + 1][x] == '&' or map_of_level[y + 1][x] == '@' or map_of_level[y + 1][x] == '%':
+                map_of_level[y + 1][x] == 'x' or map_of_level[y + 1][x] == '@' or map_of_level[y + 1][x] == '%':
             charec.move_player(x, y + 1)
     if direction == 'up':
-        if map_of_level[y - 1][x] == '&' and y > 0:
-            save_level('normal', x, y)
         if sector != 0:
             if map_of_level[y - 1][x] == '*' and y > 0:
                 all_points += 1
@@ -326,47 +332,54 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y - 1][x] == '0':
             if all_points >= 1 and y > 0:
                 all_points += 1
+                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
-                map_of_level[y - 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y - 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y - 1][x] == '1':
             if all_points >= 10 and y > 0:
                 all_points += 2
+                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
-                map_of_level[y - 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y - 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y - 1][x] == '2':
             if all_points >= 15 and y > 0:
                 all_points += 3
+                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
-                map_of_level[y - 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y - 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y - 1][x] == '3':
             if all_points >= 25 and y > 0:
                 all_points += 4
+                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
-                map_of_level[y - 1][x] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x, y - 1)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
+        if map_of_level[y - 1][x] == '4':
+            death_screen(width, height)
+            restart('normal')
         if map_of_level[y - 1][x] == '^' and y > 0:
             death_screen(width, height)
             restart('normal')
@@ -383,7 +396,7 @@ def movement(charec, direction):  # передвижение(егор)
             generate_level(map_of_level)
             player.move_player(4, 4)
         if y > 0 and map_of_level[y - 1][x] == '.' or map_of_level[y - 1][x] == '*' or \
-                map_of_level[y - 1][x] == '&' or map_of_level[y - 1][x] == '@' or map_of_level[y + 1][x] == '%':
+                map_of_level[y - 1][x] == 'x' or map_of_level[y - 1][x] == '@' or map_of_level[y - 1][x] == '%':
             charec.move_player(x, y - 1)
     if direction == 'right':
         if map_of_level[y][x + 1] == '&' and x < border_x - 1:
@@ -406,47 +419,54 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y][x + 1] == '0':
             if all_points >= 1 and x < border_x - 1:
                 all_points += 1
+                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
-                map_of_level[y][x + 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x + 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x + 1] == '1':
             if all_points >= 10 and x < border_x - 1:
                 all_points += 2
+                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
-                map_of_level[y][x + 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x + 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x + 1] == '2':
             if all_points >= 15 and x < border_x - 1:
                 all_points += 3
+                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
-                map_of_level[y][x + 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x + 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x + 1] == '3':
             if all_points >= 25 and x < border_x - 1:
                 all_points += 4
+                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
-                map_of_level[y][x + 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x + 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
+        if map_of_level[y][x + 1] == '4':
+            death_screen(width, height)
+            restart('normal')
         if map_of_level[y][x + 1] == '^' and x < border_x - 1:
             death_screen(width, height)
             restart('normal')
@@ -462,8 +482,8 @@ def movement(charec, direction):  # передвижение(егор)
             map_of_level = load_level(f'sector{sector}.txt')
             generate_level(map_of_level)
             player.move_player(4, 4)
-        if x < border_x - 1 and map_of_level[y][x + 1] == '.' or map_of_level[y][x + 1] == '*' or \
-                map_of_level[y][x + 1] == '&' or map_of_level[y][x + 1] == '@' or map_of_level[y + 1][x] == '%':
+        if x < border_x - 1 and map_of_level[y][x + 1] == '.' or map_of_level[y][x + 1] == '*' or map_of_level[y][
+                x + 1] == 'x' or map_of_level[y][x + 1] == '@' or map_of_level[y][x + 1] == '%':
             charec.move_player(x + 1, y)
             charec.change_look('right')
     if direction == 'left':
@@ -484,47 +504,54 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y][x - 1] == '0':
             if all_points >= 1 and x > 0:
                 all_points += 1
+                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
-                map_of_level[y][x - 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x - 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x - 1] == '1':
             if all_points >= 10 and x > 0:
                 all_points += 2
+                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
-                map_of_level[y][x - 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x - 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x - 1] == '2':
             if all_points >= 15 and x > 0:
                 all_points += 3
+                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
-                map_of_level[y][x - 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x - 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x - 1] == '3':
             if all_points >= 25 and x > 0:
                 all_points += 4
+                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
-                map_of_level[y][x - 1] = '.'
-                attack_is = True
-                save_coord = player.positions[0], player.positions[1]
+                Tile('dead', x - 1, y)
+                save_coord = x, y
                 player_group.empty()
+                attack_is_1 = True
             else:
                 death_screen(width, height)
                 restart('normal')
+        if map_of_level[y][x - 1] == '4':
+            death_screen(width, height)
+            restart('normal')
         if map_of_level[y][x - 1] == '^' and x > 0:
             death_screen(width, height)
             restart('normal')
@@ -541,9 +568,17 @@ def movement(charec, direction):  # передвижение(егор)
             generate_level(map_of_level)
             player.move_player(4, 4)
         if x > 0 and map_of_level[y][x - 1] == '.' or map_of_level[y][x - 1] == '*' or \
-                map_of_level[y][x - 1] == '&' or map_of_level[y][x - 1] == '@' or map_of_level[y + 1][x] == '%':
+                map_of_level[y][x - 1] == 'x' or map_of_level[y][x - 1] == '@' or map_of_level[y][x - 1] == '%':
             charec.move_player(x - 1, y)
             charec.change_look('left')
+
+
+def shoot(x, y):
+    global map_of_level
+    if map_of_level[y][x] == '4':
+        map_of_level[y][x] = 'x'
+        Tile('empty', x, y)
+        Tile('dead', x, y)
 
 
 class Player(pygame.sprite.Sprite):  # класс игрока(егор)
@@ -602,8 +637,8 @@ class AnimatedGemGet(pygame.sprite.Sprite):  # анимация разрушен
 class AnimatedAttack1(pygame.sprite.Sprite):  # анимация атаки(егор)
     def __init__(self, sheet, columns, rows, x, y, look):
         super().__init__(attack1_sprites)
-        self.place_x = player.positions[0]
-        self.place_y = player.positions[1]
+        self.place_x = save_coord[0]
+        self.place_y = save_coord[1]
         self.look = look
         self.frames = []  # список кадров
         self.cut_sheet(sheet, columns, rows)  # разреанная на кадры
@@ -683,9 +718,9 @@ class Board:  # создание доски(егор)
         self.height = height1
         self.board = [[0] * width for _ in range(height1)]
         # значения по умолчанию
-        self.left = 10
-        self.top = 10
-        self.cell_size = 30
+        self.left = 0
+        self.top = 0
+        self.cell_size = 50
 
     # настройка внешнего вида
     def set_view(self, left, top, cell_size):
@@ -718,7 +753,6 @@ if __name__ == '__main__':
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(0.2)
 
-    all_points = int(load_points())
     FPS = 24
     running = True
     clock = pygame.time.Clock()
@@ -756,6 +790,7 @@ if __name__ == '__main__':
                 attack_is_3 = True
                 shoot_at = board.get_cell(event.pos)
                 save_coord = player.positions[0], player.positions[1]
+                shoot(shoot_at[0], shoot_at[1])
                 player_group.empty()
             key = pygame.key.get_pressed()
             if key[pygame.K_DOWN] or key[pygame.K_s]:
@@ -769,7 +804,7 @@ if __name__ == '__main__':
             if key[pygame.K_SPACE]:
                 restart('total')
                 sys.exit()
-        save_coord = (player.positions[0], player.positions[1])
+        save_coord = player.positions[0], player.positions[1]
         screen.fill((0, 0, 0))
         tiles_group.draw(screen)
         player_group.draw(screen)
