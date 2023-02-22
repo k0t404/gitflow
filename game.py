@@ -250,48 +250,48 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y + 1][x] == '0':
             if all_points >= 1 and y < border_y - 1:
                 all_points += 1
-                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
                 Tile('dead', x, y + 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y + 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y + 1][x] == '1':
             if all_points >= 10 and y < border_y - 1:
                 all_points += 2
-                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
                 Tile('dead', x, y + 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y + 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y + 1][x] == '2':
             if all_points >= 15 and y < border_y - 1:
                 all_points += 3
-                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
                 Tile('dead', x, y + 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y + 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y + 1][x] == '3':
             if all_points >= 25 and y < border_y - 1:
                 all_points += 4
-                map_of_level[y + 1][x] = 'x'
                 Tile('empty', x, y + 1)
                 Tile('dead', x, y + 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y + 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -332,48 +332,48 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y - 1][x] == '0':
             if all_points >= 1 and y > 0:
                 all_points += 1
-                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
                 Tile('dead', x, y - 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y - 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y - 1][x] == '1':
             if all_points >= 10 and y > 0:
                 all_points += 2
-                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
                 Tile('dead', x, y - 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y - 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y - 1][x] == '2':
             if all_points >= 15 and y > 0:
                 all_points += 3
-                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
                 Tile('dead', x, y - 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y - 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y - 1][x] == '3':
             if all_points >= 25 and y > 0:
                 all_points += 4
-                map_of_level[y - 1][x] = 'x'
                 Tile('empty', x, y - 1)
                 Tile('dead', x, y - 1)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y - 1][x] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -419,48 +419,48 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y][x + 1] == '0':
             if all_points >= 1 and x < border_x - 1:
                 all_points += 1
-                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
                 Tile('dead', x + 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x + 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x + 1] == '1':
             if all_points >= 10 and x < border_x - 1:
                 all_points += 2
-                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
                 Tile('dead', x + 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x + 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x + 1] == '2':
             if all_points >= 15 and x < border_x - 1:
                 all_points += 3
-                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
                 Tile('dead', x + 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x + 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x + 1] == '3':
             if all_points >= 25 and x < border_x - 1:
                 all_points += 4
-                map_of_level[y][x + 1] = 'x'
                 Tile('empty', x + 1, y)
                 Tile('dead', x + 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x + 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -504,48 +504,48 @@ def movement(charec, direction):  # передвижение(егор)
         if map_of_level[y][x - 1] == '0':
             if all_points >= 1 and x > 0:
                 all_points += 1
-                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
                 Tile('dead', x - 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x - 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x - 1] == '1':
             if all_points >= 10 and x > 0:
                 all_points += 2
-                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
                 Tile('dead', x - 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x - 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x - 1] == '2':
             if all_points >= 15 and x > 0:
                 all_points += 3
-                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
                 Tile('dead', x - 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x - 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
         if map_of_level[y][x - 1] == '3':
             if all_points >= 25 and x > 0:
                 all_points += 4
-                map_of_level[y][x - 1] = 'x'
                 Tile('empty', x - 1, y)
                 Tile('dead', x - 1, y)
-                save_coord = x, y
-                player_group.empty()
+                map_of_level[y][x - 1] = 'x'
                 attack_is_1 = True
+                save_coord = player.positions[0], player.positions[1]
+                player_group.empty()
             else:
                 death_screen(width, height)
                 restart('normal')
@@ -637,8 +637,8 @@ class AnimatedGemGet(pygame.sprite.Sprite):  # анимация разрушен
 class AnimatedAttack1(pygame.sprite.Sprite):  # анимация атаки(егор)
     def __init__(self, sheet, columns, rows, x, y, look):
         super().__init__(attack1_sprites)
-        self.place_x = save_coord[0]
-        self.place_y = save_coord[1]
+        self.place_x = player.positions[0]
+        self.place_y = player.positions[1]
         self.look = look
         self.frames = []  # список кадров
         self.cut_sheet(sheet, columns, rows)  # разреанная на кадры
@@ -654,6 +654,14 @@ class AnimatedAttack1(pygame.sprite.Sprite):  # анимация атаки(ег
                 frame_location = (self.rect.w * i, self.rect.h * j)  # позиция кадра на изначльном изображении
                 self.frames.append(sheet.subsurface(pygame.Rect(  # доюавляем в список кадров
                     frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)  # обновление номера кадра
+        if self.look == 'left':
+            self.image = self.frames[self.cur_frame]  # обновление самого кадра
+            self.image = pygame.transform.flip(self.image, True, False)
+        else:
+            self.image = self.frames[self.cur_frame]
 
 
 class AnimatedAttack2(pygame.sprite.Sprite):  # анимация атаки(егор)
@@ -820,49 +828,52 @@ if __name__ == '__main__':
             gem_get_sprites.empty()
             cou_gem_get = 1
             gem_get_is = False
-        if cou_attack_1 <= 8 and attack_is_1:
-            if cou_attack_1 == 1:
-                # приводим класс в действие
-                attack = AnimatedAttack1(load_image("anim.png", 'white'), 4, 2, 50, 50, player.look)
-            attack1_sprites.update()  # запускаем анимацию
-            attack1_sprites.draw(screen)
-            cou_attack_1 += 1
-        if cou_attack_1 > 8:
-            attack1_sprites.empty()
-            cou_attack = 1
-            attack_is = False
-            if player.look == 'left':
-                player = Player(save_coord[0], save_coord[1])
-                player.change_look('left')
-            else:
-                player = Player(save_coord[0], save_coord[1])
-        if cou_attack_2 <= 8 and attack_is_2:
-            if cou_attack_2 == 1:
-                # приводим класс в действие
-                attack = AnimatedAttack2(load_image("anim2.png", 'white'), 4, 2, 50, 50, player.look)
-            attack2_sprites.update()  # запускаем анимацию
-            attack2_sprites.draw(screen)
-            cou_attack_2 += 1
-        if cou_attack_2 > 8:
-            attack2_sprites.empty()
-            cou_attack_2 = 1
-            attack_is_2 = False
-            if player.look == 'left':
-                player = Player(save_coord[0], save_coord[1])
-                player.change_look('left')
-            else:
-                player = Player(save_coord[0], save_coord[1])
-        if cou_attack_3 <= 8 and attack_is_3:
-            if cou_attack_3 == 1:
-                # приводим класс в действие
-                attack = AnimatedAttack3(load_image("anim3.png", 'white'), 4, 2, 50, 50)
-            attack3_sprites.update()  # запускаем анимацию
-            attack3_sprites.draw(screen)
-            cou_attack_3 += 1
-        if cou_attack_3 > 8:
-            attack3_sprites.empty()
-            cou_attack_3 = 1
-            attack_is_3 = False
+        if attack_is_1:
+            if cou_attack_1 <= 8:
+                if cou_attack_1 == 1:
+                    # приводим класс в действие
+                    attack = AnimatedAttack1(load_image("anim.png", 'white'), 4, 2, 50, 50, player.look)
+                attack1_sprites.update()  # запускаем анимацию
+                attack1_sprites.draw(screen)
+                cou_attack_1 += 1
+            if cou_attack_1 > 8:
+                attack1_sprites.empty()
+                cou_attack_1 = 1
+                attack_is_1 = False
+                if player.look == 'left':
+                    player = Player(save_coord[0], save_coord[1])
+                    player.change_look('left')
+                else:
+                    player = Player(save_coord[0], save_coord[1])
+        if attack_is_2:
+            if cou_attack_2 <= 8:
+                if cou_attack_2 == 1:
+                    # приводим класс в действие
+                    attack = AnimatedAttack2(load_image("anim2.png", 'white'), 4, 2, 50, 50, player.look)
+                attack2_sprites.update()  # запускаем анимацию
+                attack2_sprites.draw(screen)
+                cou_attack_2 += 1
+            if cou_attack_2 > 8:
+                attack2_sprites.empty()
+                cou_attack_2 = 1
+                attack_is_2 = False
+                if player.look == 'left':
+                    player = Player(save_coord[0], save_coord[1])
+                    player.change_look('left')
+                else:
+                    player = Player(save_coord[0], save_coord[1])
+        if attack_is_3:
+            if cou_attack_3 <= 8:
+                if cou_attack_3 == 1:
+                    # приводим класс в действие
+                    attack = AnimatedAttack3(load_image("anim3.png", 'white'), 4, 2, 50, 50)
+                attack3_sprites.update()  # запускаем анимацию
+                attack3_sprites.draw(screen)
+                cou_attack_3 += 1
+            if cou_attack_3 > 8:
+                attack3_sprites.empty()
+                cou_attack_3 = 1
+                attack_is_3 = False
         up_level(all_points)
         remote_out(all_points)
         remote_load(level_player)
